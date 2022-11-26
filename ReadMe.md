@@ -45,9 +45,16 @@ export GOPROXY=https://goproxy.cn
 除了自行安装工具，在Linux下还可直接使用docker(需要自行安装docker)命令直接进入编译环境：
 
 ```bash
+#若一开始使用docker那么需要一直使用docker。否则openwrt做的某些软链接会失效。
+
+#此openwrt-be镜像推荐用于脚本测试，除非手动安装环境不成功，不推荐直接用于整个openwrt的编译，推荐使用ubuntu镜像。
 sudo docker run -it --rm -u  `id -u`:`id -g` -v `pwd`:/work -w /work heyahong/openwrt-be:22.03 /bin/bash
-#若一开始就使用docker镜像,就需要一直使用docker。
 #更多关于此docker镜像的说明见https://hub.docker.com/r/heyahong/openwrt-be
+
+#此ubuntu镜像安装了编译所需工具，可直接作为编译环境。
+sudo docker run -it --rm -u  `id -u`:`id -g` -v `pwd`:/work -w /work heyahong/buildenv-ubuntu22.04:base
+#更多关于此docker镜像的说明见https://hub.docker.com/r/heyahong/buildenv-ubuntu22.04
+
 ```
 
 ## 常用操作
