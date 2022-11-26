@@ -2,7 +2,7 @@
 
 这是一个使用openwrt开发MT7688的例子(仅供测试)。
 
-硬件为HLK-7688A,采用MT766AN作为主芯片，具有32M Flash与128M DDR2 。
+硬件为HLK-7688A模块,采用MT766AN作为主芯片，具有32M Flash与128M DDR2 RAM。
 
 ## key-build
 
