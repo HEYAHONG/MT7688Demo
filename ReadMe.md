@@ -4,6 +4,18 @@
 
 硬件为HLK-7688A模块,采用MT7688AN作为主芯片，具有32M Flash与128M DDR2 RAM。
 
+## 源代码下载
+
+由于本源代码包含第三方源代码,故直接下载可能有部分源代码缺失，需要通过以下方法解决:
+
+- 在进行git clone 使用--recurse-submodules参数。
+
+- 若已通过git clone下载,则在源代码目录中执行以下命令下载子模块:
+
+  ```bash
+   git submodule update --init --recursive
+  ```
+
 ## key-build
 
 采用openwrt的工具usign生成,生成后可在应用中使用公钥校验文件。
