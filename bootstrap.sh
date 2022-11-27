@@ -69,13 +69,15 @@ export ROOT_PATH="${script_dir}";
 #下载缺失的源码
 echo -e  "\033[44;37m下载openwrt\033[40;37m";
 git submodule  update --init --recursive --force
-[ $? -eq 0 ] || (echo "下载失败!!!" && exit);
+[ $? -eq 0 ] || exit;
 
 #清理openwrt目录
 echo -e "\033[44;37m清理openwrt\033[40;37m";
 cd $ROOT_PATH/openwrt
 git clean -f
+[ $? -eq 0 ] || exit;
 git reset --hard
+[ $? -eq 0 ] || exit;
 cd $ROOT_PATH
 
 #安装支持补丁
