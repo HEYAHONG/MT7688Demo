@@ -6,13 +6,14 @@
 
 int main(int argc, char *argv[])
 {
-    printf("number of interface:%d\r\n", (int)netlib_ifconf_getsize());
 
-    for (size_t i = 0; i < netlib_ifconf_getsize(); i++)
+    int if_count = 0;
+    for (size_t i = 0; i < 32; i++)
     {
         const char *ifname = netlib_ifconf_getifname(i);
         if (ifname != NULL)
         {
+            if_count++;
             printf("\t%d: %s:\r\n", (int)i + 1, ifname);
             uint8_t *mac = netlib_ifconfig_getifhwaddr(ifname);
             if (mac != NULL)
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
         }
 
     }
+
+    printf("number of interface:%d\r\n", (int)if_count);
 
     return 0;
 }
