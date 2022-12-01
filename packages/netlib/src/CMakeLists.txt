@@ -26,6 +26,17 @@ option(OPENWRT "build in openwrt" OFF)
 if(OPENWRT)
 add_definitions(" -DOPENWRT ")
 endif()
+#添加一些测试应用，用于测试库
+file(GLOB TESTS  ${CMAKE_SOURCE_DIR}/tests/*)
+foreach(TEST ${TESTS})
+	if(EXISTS ${TEST})
+		file(RELATIVE_PATH TESTEXE  ${CMAKE_SOURCE_DIR}/tests/  ${TEST})
+		add_executable(${TESTEXE}.exe ${TEST})
+		target_link_libraries(${TESTEXE}.exe  appnetlib)
+		target_include_directories(${TESTEXE}.exe PUBLIC ${CMAKE_SOURCE_DIR})
+	endif()
+endforeach()
+
 
 include(FindPkgConfig)
 #pthread库
