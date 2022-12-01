@@ -14,6 +14,9 @@
  * \return size_t 网络接口数量
  *
  */
+#ifndef MAX_INTERFACE_NUMBER
+#define MAX_INTERFACE_NUMBER 32 //此数量一定要多于实际的网络接口数量
+#endif // MAX_INTERFACE_NUMBER
 size_t netlib_ifconf_getsize(int sock)
 {
     size_t ret = 0;
@@ -24,16 +27,21 @@ size_t netlib_ifconf_getsize(int sock)
 
     struct ifconf ifc = {0};
 
+    ifc.ifc_len = sizeof(struct ifreq) * MAX_INTERFACE_NUMBER;
+    ifc.ifc_req = (struct ifreq *)malloc(ifc.ifc_len);
+
+
     if (ioctl(sock, SIOCGIFCONF, &ifc) >= 0)
     {
         if (ifc.ifc_len > 0)
         {
             ret = ifc.ifc_len / sizeof(struct ifreq);
         }
-        if (ifc.ifc_req != NULL)
-        {
-            free(ifc.ifc_req);
-        }
+    }
+
+    if (ifc.ifc_req != NULL)
+    {
+        free(ifc.ifc_req);
     }
 
     return ret;
