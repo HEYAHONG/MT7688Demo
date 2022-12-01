@@ -2,7 +2,9 @@
 #define __NETLIB_H__
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <sys/socket.h>
 #ifdef __cplusplus
 extern "C"
 {
@@ -73,6 +75,58 @@ const char *netlib_ifconf_getifname(size_t index);
 #define NETLIB_IFHWADDR_SIZE 6
 uint8_t *netlib_ifconfig_getifhwaddr(int sock, const char *ifname);
 
+
+
+typedef struct sockaddr netlib_addr_t; /**< 地址信息定义 */
+
+
+/** \brief 获取地址信息
+ *
+ * \param sock int 套接字
+ * \param ifname const char* 网络接口名字
+ * \return netlib_addr_t 地址信息，失败返回NULL
+ *
+ */
+netlib_addr_t *netlib_ifconfig_getifaddr(int sock, const char *ifname);
+
+/** \brief 获取地址掩码信息
+ *
+ * \param sock int 套接字
+ * \param ifname const char* 网络接口名字
+ * \return netlib_addr_t 地址掩码信息，失败返回NULL
+ *
+ */
+netlib_addr_t *netlib_ifconfig_getifnetmask(int sock, const char *ifname);
+
+
+/** \brief 检查是否有RUNNING标志
+ *
+ * \param sock int 套接字
+ * \param ifname const char* 网络接口名字
+ * \return bool 是返回true
+ *
+ */
+bool netlib_ifconfig_isrunning(int sock, const char *ifname);
+
+/** \brief 检查是否有UP标志
+ *
+ * \param sock int 套接字
+ * \param ifname const char* 网络接口名字
+ * \return bool 是返回true
+ *
+ */
+bool netlib_ifconfig_isup(int sock, const char *ifname);
+
+/** \brief 检查是否有LOOPBACK标志
+ *
+ * \param sock int 套接字
+ * \param ifname const char* 网络接口名字
+ * \return bool 是返回true
+ *
+ */
+bool netlib_ifconfig_isloopback(int sock, const char *ifname);
+
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
@@ -97,6 +151,43 @@ size_t netlib_ifconf_getsize();
  */
 uint8_t *netlib_ifconfig_getifhwaddr(const char *ifname);
 
+/** \brief 获取地址信息
+ *
+ * \param ifname const char* 网络接口名字
+ * \return netlib_addr_t 地址信息，失败返回NULL
+ *
+ */
+netlib_addr_t *netlib_ifconfig_getifaddr(const char *ifname);
+
+/** \brief 获取地址信息
+ *
+ * \param ifname const char* 网络接口名字
+ * \return netlib_addr_t 地址信息，失败返回NULL
+ *
+ */
+netlib_addr_t *netlib_ifconfig_getifnetmask(const char *ifname);
+
+/** \brief 检查是否有RUNNING标志
+ *
+ * \param ifname const char* 网络接口名字
+ * \return bool 是返回true
+ *
+ */
+bool netlib_ifconfig_isrunning(const char *ifname);
+/** \brief 检查是否有UP标志
+ *
+ * \param ifname const char* 网络接口名字
+ * \return bool 是返回true
+ *
+ */
+bool netlib_ifconfig_isup(const char *ifname);
+/** \brief 检查是否有LOOPBACK标志
+ *
+ * \param ifname const char* 网络接口名字
+ * \return bool 是返回true
+ *
+ */
+bool netlib_ifconfig_isloopback(const char *ifname);
 
 #endif // __cplusplus
 
