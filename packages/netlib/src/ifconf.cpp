@@ -29,6 +29,7 @@ size_t netlib_ifconf_getsize(int sock)
 
     ifc.ifc_len = sizeof(struct ifreq) * MAX_INTERFACE_NUMBER;
     ifc.ifc_req = (struct ifreq *)malloc(ifc.ifc_len);
+    memset(ifc.ifc_req,0,ifc.ifc_len);
 
 
     if (ioctl(sock, SIOCGIFCONF, &ifc) >= 0)
