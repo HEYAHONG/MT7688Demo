@@ -1,0 +1,14 @@
+{
+	"admin/system/MQTTDaemon": {
+                "title": "MQTT客户端配置",
+                "action": {
+                        "type": "cbi",
+                        "path": "MQTTDaemon",
+                        "post": { "cbi.submit": true }
+                },
+                "depends": {
+                        "acl": [ "luci-MQTTDaemon" ]
+                }
+
+        }
+}

@@ -1,0 +1,15 @@
+{
+	"luci-MQTTDaemon": {
+		"description": "Grant  access for luci-MQTTDaemon",
+		"read": {
+			"uci": [ "MQTTDaemon" ]
+		},
+		"write": {
+			"cgi-io": [ "upload" ],
+                        "file": {
+                                 "/etc/MQTTDaemon/*": [ "write" ]
+                         },
+			"uci": [ "MQTTDaemon" ]
+		}
+	}
+}
