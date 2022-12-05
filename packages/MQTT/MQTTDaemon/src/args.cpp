@@ -167,18 +167,18 @@ size_t args_size()
 static thread_local std::string key;
 const char *args_getkey(size_t index)
 {
-    if(index >= args_size())
+    if (index >= args_size())
     {
         return NULL;
     }
 
-    auto it=args.begin();
+    auto it = args.begin();
 
-    std::advance(it,index);
+    std::advance(it, index);
 
-    if(it!=args.end())
+    if (it != args.end())
     {
-        key=it->first;
+        key = it->first;
         return key.c_str();
     }
 
@@ -186,13 +186,13 @@ const char *args_getkey(size_t index)
 }
 
 static thread_local std::string value;
-const char *args_get(const char * key)
+const char *args_get(const char *key)
 {
-    if(key==NULL || strlen(key)==0)
+    if (key == NULL || strlen(key) == 0)
     {
         return NULL;
     }
-    if(args.find(key)!=args.end())
+    if (args.find(key) != args.end())
     {
         value = args[key];
         return value.c_str();

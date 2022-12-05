@@ -46,7 +46,7 @@ const char *args_getkey(size_t index);
  * \return const char* 参数数据，失败返回NULL
  *
  */
-const char *args_get(const char * key);
+const char *args_get(const char *key);
 
 #ifdef __cplusplus
 }
