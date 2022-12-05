@@ -26,6 +26,34 @@
 usign -G -c "注释信息" -p key-build.pub -s key-build
 ```
 
+## 软件包
+
+软件包实现目录为 [packages/](packages/) 。除开第三方软件包，其余的软件包均将源代码放在本地目录，一般放在该软件包Makefile所在目录。对于C/C++程序，一般采用CMake作为构建工具，可生成适应各种IDE的工程。
+
+### cli
+
+软件包实现目录为 [packages/cli/](packages/cli/)。命令行程序。作为软件包模板。现无任何功能。
+
+### netlib
+
+软件包实现目录为 [packages/netlib/](packages/netlib/) 。网络库，包装一些常用的网络操作。作为库软件包模板。包含部分测试程序（编译完成后在 packages/netlib/src/build/,后缀为.exe），测试程序不会安装至openwrt。
+
+![netlib](doc/image/netlib.png)
+
+### MQTTDaemon
+
+软件包实现目录为 [packages/MQTT/MQTTDaemon/](packages/MQTT/MQTTDaemon/) 。MQTT守护进程，可连接MQTT Broker。
+
+![MQTTDaemon](doc/image/MQTTDaemon.png)
+
+### luci-MQTTDaemon
+
+软件包实现目录为 [packages/MQTT/luci-MQTTDaemon/](packages/MQTT/luci-MQTTDaemon/) 。MQTT守护进程的luci界面。
+
+![luci-MQTTDaemon](doc/image/luci-MQTTDaemon.png)
+
+
+
 # 编译
 
 openwrt编译过程中,需要下载大量的数据，尤其是要确保github.com等外网的联通，若因下载失败而编译失败，请手动下载相应的软件包放入openwrt/dl目录,再重新编译。若网络不好需要编译很多次极为正常。
