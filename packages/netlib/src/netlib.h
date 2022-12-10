@@ -25,6 +25,42 @@ extern "C"
 const char *netlib_getversion();
 
 
+
+/** \brief 日志回调函数定义
+ */
+typedef void netlib_log_cb(const char *file, int line, const char *log);
+/** \brief 日志回调函数指针
+ */
+typedef netlib_log_cb *netlib_log_cb_t;
+
+/** \brief 日志函数（通常不直接调用，只调用宏）
+ *
+ * \param file const char * 文件名
+ * \param line int 行号
+ * \param log const char* 日志内容
+ * \param ... 可变参数，配合log使用
+ *
+ */
+void netlib_log_real(const char *file, int line, const char *log, ...);
+
+/** \brief 日志函数
+ *
+ *
+ */
+#ifndef NETLIB_LOG
+#define NETLIB_LOG(fmt,...) {netlib_log_real(__FILE__,__LINE__,fmt,##__VA_ARGS__ );}
+#endif // NETLIB_LOG
+
+
+/** \brief 设置日志回调函数
+ *
+ * \param cb netlib_log_cb_t  日志回调函数
+ * \param isthread bool 是否为线程设置
+ *
+ */
+void netlib_log_callback_set(netlib_log_cb_t cb, bool isthread);
+
+
 /** \brief 获取套接字(AF_INET),所有的网络操作（包括对网络信息的查询）均需要套接字作为参数。
  *
  * \return int 套接字
@@ -134,6 +170,15 @@ bool netlib_ifconfig_isloopback(int sock, const char *ifname);
 #ifdef __cplusplus
 #include <string>
 #include <vector>
+#include <functional>
+
+/** \brief 设置日志回调函数
+ *
+ * \param cb std::function<netlib_log_cb>  日志回调函数
+ * \param isthread bool 是否为线程设置
+ *
+ */
+void netlib_log_callback_set(std::function<netlib_log_cb> cb, bool isthread = true);
 
 /** \brief 获取网络接口数量
  *

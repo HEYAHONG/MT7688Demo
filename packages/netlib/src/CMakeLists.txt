@@ -6,8 +6,9 @@ project(${PROJECTNAME} C CXX ASM)
 file(GLOB NETLIB_HEADER_FILES *.h)
 file(GLOB NETLIB_SOURCES_FILES *.c *.cpp)
 add_library(appnetlib SHARED  ${NETLIB_SOURCES_FILES} ${NETLIB_HEADER_FILES} )
-#设置C++标准
+#设置C++/C标准
 set_property(TARGET appnetlib PROPERTY CXX_STANDARD 20)
+set_property(TARGET appnetlib PROPERTY C_STANDARD 20)
 
 #获取程序版本
 find_package(Git)
