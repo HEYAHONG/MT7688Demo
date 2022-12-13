@@ -163,6 +163,15 @@ bool netlib_ifconfig_isup(int sock, const char *ifname);
 bool netlib_ifconfig_isloopback(int sock, const char *ifname);
 
 
+/** \brief 通过主机名获取网络地址（第一个有效地址）
+ *
+ * \param isipv6 bool 是否为IPV6
+ * \param host const char* 主机名
+ * \return netlib_addr_t* 网络地址,失败返回NULL
+ *
+ */
+netlib_addr_t *netlib_nslookup(bool isipv6, const char *host);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
