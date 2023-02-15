@@ -498,8 +498,8 @@ CONFIG_TARGET_INIT_CMD="/sbin/init"
 CONFIG_TARGET_INIT_SUPPRESS_STDERR=y
 CONFIG_VERSIONOPT=y
 CONFIG_VERSION_DIST="OpenWrt"
-CONFIG_VERSION_NUMBER="2022-12-19"
-CONFIG_VERSION_CODE="c1e5f26"
+CONFIG_VERSION_NUMBER="2023-02-15"
+CONFIG_VERSION_CODE="871d17d"
 CONFIG_VERSION_REPO="https://downloads.openwrt.org/releases/22.03-SNAPSHOT"
 CONFIG_VERSION_HOME_URL=""
 CONFIG_VERSION_MANUFACTURER=""
@@ -2006,7 +2006,6 @@ CONFIG_PACKAGE_wireless-regdb=y
 # CONFIG_PACKAGE_kmod-ata-ahci is not set
 # CONFIG_PACKAGE_kmod-ata-artop is not set
 # CONFIG_PACKAGE_kmod-ata-core is not set
-# CONFIG_PACKAGE_kmod-ata-marvell-sata is not set
 # CONFIG_PACKAGE_kmod-ata-nvidia-sata is not set
 # CONFIG_PACKAGE_kmod-ata-pdc202xx-old is not set
 # CONFIG_PACKAGE_kmod-ata-piix is not set
@@ -5354,6 +5353,7 @@ CONFIG_PACKAGE_uhttpd-mod-ubus=y
 # CONFIG_PACKAGE_uhttpd-mod-ucode is not set
 # CONFIG_PACKAGE_uwsgi is not set
 # CONFIG_PACKAGE_v2raya is not set
+# CONFIG_PACKAGE_xfrpc is not set
 # end of Web Servers/Proxies
 
 #
@@ -5451,6 +5451,7 @@ CONFIG_PACKAGE_wpad-basic-wolfssl=y
 # CONFIG_PACKAGE_beanstalkd is not set
 # CONFIG_PACKAGE_bmon is not set
 # CONFIG_PACKAGE_boinc is not set
+# CONFIG_PACKAGE_boinc-wrapper is not set
 # CONFIG_PACKAGE_bpftool-full is not set
 # CONFIG_PACKAGE_bpftool-minimal is not set
 # CONFIG_PACKAGE_bwm-ng is not set
@@ -5663,6 +5664,7 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_tayga is not set
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
+# CONFIG_PACKAGE_telnet-bsd is not set
 # CONFIG_PACKAGE_tgt is not set
 # CONFIG_PACKAGE_tmate-ssh-server is not set
 # CONFIG_PACKAGE_tor is not set
