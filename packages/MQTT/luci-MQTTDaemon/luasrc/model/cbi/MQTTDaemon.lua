@@ -47,19 +47,19 @@ o:value("1",_("是"))
 o.default="0"
 
 o = s:option(FileUpload, "CAFile", _("CA 文件路径"),_("CA文件路径与CA搜索目录任一有效才能启用SSL/TLS"))
-o.initial_directory = "/etc/LightControler/"
+o.initial_directory = "/etc/MQTTDaemon/"
 
 
 o = s:option(Value, "CAPath", _("CA 搜索目录"),_("CA文件路径与CA搜索目录任一有效才能启用SSL/TLS"))
 o.datatype = "directory"
-o.default="/etc/LightControler/"
+o.default="/etc/MQTTDaemon/"
 
 o = s:option(FileUpload, "CertFile", _("证书(PEM格式)"),_("证书与证书密钥需要同时有效才能启用SSL/TLS双向认证"))
-o.initial_directory = "/etc/LightControler/"
+o.initial_directory = "/etc/MQTTDaemon/"
 
 
 o = s:option(FileUpload, "KeyFile", _("证书密钥(PEM格式)"),_("证书与证书密钥需要同时有效才能启用SSL/TLS双向认证"))
-o.initial_directory = "/etc/LightControler/"
+o.initial_directory = "/etc/MQTTDaemon/"
 
 o=s:option(ListValue, "CheckServerName", _("检查服务名称"),_("检查服务名称是否与服务器证书记录的值一致,测试证书不能启用此选项"))
 o:value("0",_("否"))

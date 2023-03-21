@@ -1,0 +1,12 @@
+config default 'MQTT'
+	option Address 'studio-mqtt.heclouds.com:8883'
+	option Keepalive '120'
+	option SSL '1'
+	option CAFile '/etc/OneNETDaemon/OneNET/MQTTS-certificate.pem'
+	option CheckServerName '0'
+
+config default 'OneNET'
+	option DeviceName ''
+	option ProductID 'rZVjXZZXa4'
+	option AccessKey 'vncBpL0gJjtmCHPpTJEV+6uaD98wdAeiw068w6d97vI='
+

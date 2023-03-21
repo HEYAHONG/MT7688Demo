@@ -1,0 +1,14 @@
+{
+	"admin/system/OneNETDaemon": {
+                "title": "OneNET配置",
+                "action": {
+                        "type": "cbi",
+                        "path": "OneNETDaemon",
+                        "post": { "cbi.submit": true }
+                },
+                "depends": {
+                        "acl": [ "luci-OneNETDaemon" ]
+                }
+
+        }
+}

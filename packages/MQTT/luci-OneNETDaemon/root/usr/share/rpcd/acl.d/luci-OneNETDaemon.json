@@ -1,0 +1,15 @@
+{
+	"luci-OneNETDaemon": {
+		"description": "Grant  access for luci-OneNETDaemon",
+		"read": {
+			"uci": [ "OneNETDaemon" ]
+		},
+		"write": {
+			"cgi-io": [ "upload" ],
+                        "file": {
+                                 "/etc/OneNETDaemon/*": [ "write" ]
+                         },
+			"uci": [ "OneNETDaemon" ]
+		}
+	}
+}
