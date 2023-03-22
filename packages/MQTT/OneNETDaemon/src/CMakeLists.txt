@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.20)
 
 set(PROJECTNAME OneNETDaemon)
 project(${PROJECTNAME} C CXX ASM)
@@ -44,6 +44,11 @@ target_link_libraries( ${PROJECTNAME}  PkgConfig::LIBMOSQUITTO)
 #argtable3
 find_package(Argtable3 REQUIRED)
 target_link_libraries( ${PROJECTNAME}  argtable3::argtable3)
+
+#jsoncpp
+pkg_check_modules(JsonCpp REQUIRED  IMPORTED_TARGET jsoncpp)
+target_link_libraries( ${PROJECTNAME}  PkgConfig::JsonCpp)
+
 
 #mbedtls
 #鉴于大多数嵌入式中加密库均是由mbedtls实现,因此采用mbedtls作为加密库
