@@ -111,6 +111,32 @@ public:
     bool PropertyDesiredDelete(std::map<std::string,int> params,std::string id,OneJsonType type=ONENET_ONEJSON_TYPE_DEFAULT);
     void SetOnPropertyDesiredDeleteReply(std::function<void(std::string,int,std::string)> _OnPropertyDesiredDeleteReply);
 
+    //OneJson管理拓扑关系接口
+    bool SubTopoAdd(std::string productID,std::string deviceName,std::string accesskey,std::string id,OneJsonType type=ONENET_ONEJSON_TYPE_DEFAULT);
+    void SetOnSubTopoAddReply(std::function<void(std::string,int,std::string)> _OnSubTopoAddReply);
+    bool SubTopoDelete(std::string productID,std::string deviceName,std::string accesskey,std::string id,OneJsonType type=ONENET_ONEJSON_TYPE_DEFAULT);
+    void SetOnSubTopoDeleteReply(std::function<void(std::string,int,std::string)> _OnSubTopoDeleteReply);
+    bool SubTopoGet(std::string id,OneJsonType type=ONENET_ONEJSON_TYPE_DEFAULT);
+    typedef struct
+    {
+        std::string productid;
+        std::string devicename;
+    } SubTopoDevInfo;
+    void SetOnSubTopoGetReply(std::function<void(std::vector<SubTopoDevInfo>,std::string,int,std::string)> _OnSubTopoGetReply);
+    void SetOnSubTopoGetResult(std::function<void(std::string,int,std::string)> _OnSubTopoGetResult);
+    void SetOnSubTopoChange(std::function<void(std::vector<SubTopoDevInfo>)> _OnSubTopoChange);
+
+    //OneJson子设备上下线接口
+    bool SubLogin(std::string productID,std::string deviceName,std::string id,OneJsonType type=ONENET_ONEJSON_TYPE_DEFAULT);
+    void SetOnSubLoginReply(std::function<void(std::string,int,std::string)> _OnSubLoginReply);
+    bool SubLogout(std::string productID,std::string deviceName,std::string id,OneJsonType type=ONENET_ONEJSON_TYPE_DEFAULT);
+    void SetOnSubLogoutReply(std::function<void(std::string,int,std::string)> _OnSubLogoutReply);
+
+    //OneJson子设备数据交互接口
+    void SetOnSubPropertyGet(std::function<bool(std::string,std::string,std::string,Json::Value&)> _OnSubPropertyGet);
+    void SetOnSubPropertySet(std::function<bool(std::string,std::string,std::string,Json::Value)> _OnSubPropertySet);
+    void SetOnSubServiceInvoke(std::function<ServiceData(std::string,std::string,ServiceParam,std::string,std::string)> _OnSubServiceInvoke);
+
 
 private:
     //MQTT发送函数
@@ -134,6 +160,22 @@ private:
     //OneJson属性期望值接口
     std::function<void(std::map<std::string,PropertyDesiredValue>,std::string,int,std::string)> OnPropertyDesiredGetReply;
     std::function<void(std::string,int,std::string)> OnPropertyDesiredDeleteReply;
+
+    //OneJson管理拓扑关系接口
+    std::function<void(std::string,int,std::string)> OnSubTopoAddReply;
+    std::function<void(std::string,int,std::string)> OnSubTopoDeleteReply;
+    std::function<void(std::vector<SubTopoDevInfo>,std::string,int,std::string)> OnSubTopoGetReply;
+    std::function<void(std::string,int,std::string)> OnSubTopoGetResult;
+    std::function<void(std::vector<SubTopoDevInfo>)> OnSubTopoChange;
+
+    //OneJson子设备上下线接口
+    std::function<void(std::string,int,std::string)> OnSubLoginReply;
+    std::function<void(std::string,int,std::string)> OnSubLogoutReply;
+
+    //OneJson子设备数据交互接口
+    std::function<bool(std::string,std::string,std::string,Json::Value&)> OnSubPropertyGet;
+    std::function<bool(std::string,std::string,std::string,Json::Value)> OnSubPropertySet;
+    std::function<ServiceData(std::string,std::string,ServiceParam,std::string,std::string)> OnSubServiceInvoke;
 
 };
 
