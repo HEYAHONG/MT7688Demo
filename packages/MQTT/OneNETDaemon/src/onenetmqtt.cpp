@@ -51,7 +51,7 @@ static bool checkConfig(OneNETConfig &config)
     return true;
 }
 
-OneNETMQTT::OneNETMQTT():mqtt_context(NULL)
+OneNETMQTT::OneNETMQTT():mqtt_context(NULL),on_message_lock(NULL)
 {
 
 }
@@ -65,7 +65,24 @@ void OneNETMQTT::MQTTMessage(std::string topic,std::string payload)
     LOGINFO("%s->topic:%s,payload:%s",TAG,topic.c_str(),payload.c_str());
     if(_OnMessage!=NULL)
     {
-        _OnMessage(topic,payload);
+        try
+        {
+            if(on_message_lock==NULL)
+            {
+                _OnMessage(topic,payload);
+            }
+            else
+            {
+                std::lock_guard<std::mutex> lock(*on_message_lock);
+                _OnMessage(topic,payload);
+            }
+
+        }
+        catch(...)
+        {
+            LOGINFO("%s->process message error!",TAG);
+        }
+
     }
 }
 
@@ -208,6 +225,11 @@ bool OneNETMQTT::Publish(std::string topic,std::string payload)
 void OneNETMQTT::SetOnMessage(std::function<void(std::string,std::string)> OnMessage)
 {
     _OnMessage=OnMessage;
+}
+
+void OneNETMQTT::SetOnMessageLock(std::mutex *lock)
+{
+    on_message_lock=lock;
 }
 
 static OneNETMQTT g_mqtt;

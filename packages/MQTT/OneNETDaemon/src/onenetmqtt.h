@@ -10,6 +10,7 @@ class OneNETMQTT
 {
 private:
     void *mqtt_context;
+    std::mutex *on_message_lock;
     OneNETConfig current_config;
     bool _IsConnected;
     std::function<void(std::string,std::string)> _OnMessage;
@@ -23,6 +24,7 @@ public:
     bool IsConnected();
     bool Publish(std::string topic,std::string payload);
     void SetOnMessage(std::function<void(std::string,std::string)> OnMessage);
+    void SetOnMessageLock(std::mutex *lock);
 };
 
 OneNETMQTT &OneNETMQTTDefault();
