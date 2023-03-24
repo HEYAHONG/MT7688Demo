@@ -2,6 +2,7 @@
 #include "onenetconfig.h"
 #include "onenetmqtt.h"
 #include "onenetonejson.h"
+#include "onenetdevice.h"
 
 void OneNETInit()
 {
@@ -13,5 +14,8 @@ void OneNETInit()
 
     //初始化OneJson
     OneNETOneJsonInit();
+
+    //初始化设备
+    OneNETDeviceInit();
 
 }
