@@ -62,7 +62,7 @@ OneNETMQTT::~OneNETMQTT()
 
 void OneNETMQTT::MQTTMessage(std::string topic,std::string payload)
 {
-    LOGINFO("%s->topic:%s,payload:%s",TAG,topic.c_str(),payload.c_str());
+    //LOGINFO("%s->topic:%s,payload:%s",TAG,topic.c_str(),payload.c_str()); //此行代码一般用于Debug
     if(_OnMessage!=NULL)
     {
         try
