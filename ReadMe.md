@@ -54,6 +54,18 @@ usign -G -c "注释信息" -p key-build.pub -s key-build
 
 
 
+### OneNETDaemon
+
+软件包实现目录为 [packages/MQTT/OneNETDaemon](packages/MQTT/OneNETDaemon) 。OneNET网关设备守护进程，可连接[OneNET](https://open.iot.10086.cn/)平台。
+
+![OneNETDaemon](doc/image/OneNETDaemon.png)
+
+### luci-OneNETDaemon
+
+软件包实现目录为 [packages/MQTT/luci-OneNETDaemon](packages/MQTT/luci-OneNETDaemon) 。OneNET网关设备守护进程的luci界面。
+
+![luci-OneNETDaemon](doc/image/luci-OneNETDaemon.png)
+
 # 编译
 
 openwrt编译过程中,需要下载大量的数据，尤其是要确保github.com等外网的联通，若因下载失败而编译失败，请手动下载相应的软件包放入openwrt/dl目录,再重新编译。若网络不好需要编译很多次极为正常。
