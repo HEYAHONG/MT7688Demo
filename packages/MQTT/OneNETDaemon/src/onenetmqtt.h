@@ -2,15 +2,17 @@
 #define ONENETMQTT_H
 #ifdef __cplusplus
 #include "onenetconfig.h"
+#include "onenetcontext.h"
 #include <string>
 #include <functional>
-#include <mutex>
+#include <chrono>
 
 class OneNETMQTT
 {
 private:
+    std::chrono::steady_clock::time_point last_publish_time;
     void *mqtt_context;
-    std::mutex *on_message_lock;
+    OneNETContext *context;
     OneNETConfig current_config;
     bool _IsConnected;
     std::function<void(std::string,std::string)> _OnMessage;
@@ -24,7 +26,7 @@ public:
     bool IsConnected();
     bool Publish(std::string topic,std::string payload);
     void SetOnMessage(std::function<void(std::string,std::string)> OnMessage);
-    void SetOnMessageLock(std::mutex *lock);
+    void SetContext(OneNETContext *_context);
 };
 
 OneNETMQTT &OneNETMQTTDefault();

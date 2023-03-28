@@ -47,6 +47,15 @@ void OneNETContext::Run()
                 }
             }
         }
+        {
+            //动作缓存
+            std::lock_guard<std::mutex> lock(action_queue_cache_lock);
+            while(!action_queue_cache.empty())
+            {
+                action_queue.push(action_queue_cache.front());
+                action_queue_cache.pop();
+            }
+        }
         //处理动作
         if(!action_queue.empty())
         {
@@ -58,7 +67,15 @@ void OneNETContext::Run()
                     action_queue.pop();
                     if(action!=NULL)
                     {
-                        action();
+                        try
+                        {
+                            action();
+                        }
+                        catch(...)
+                        {
+
+                        }
+
                     }
                 }
             }
@@ -75,6 +92,12 @@ void OneNETContext::AddAction(std::function<void()> action)
 {
     std::lock_guard lock(context_lock);
     AddActionWithoutLock(action);
+}
+
+void OneNETContext::AddActionWithCache(std::function<void()> action)
+{
+    std::lock_guard<std::mutex> lock(action_queue_cache_lock);
+    action_queue.push(action);
 }
 
 OneNETContext::EventID OneNETContext::RegisterEvent(EventClass evtclass,std::function<void()> callback)
@@ -175,9 +198,6 @@ void OneNETContextInit()
 
     //设置设备
     g_context.SetOneNETDevice(&OneNETDeviceDefault());
-
-    //设置 消息锁
-    OneNETMQTTDefault().SetOnMessageLock(&g_context.GetContextLock());
 
 
     {

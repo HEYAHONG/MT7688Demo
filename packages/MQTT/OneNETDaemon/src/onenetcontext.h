@@ -30,6 +30,9 @@ public:
     //添加动作（注意：不能在MQTT回调或者上下文回调中使用此函数）
     void AddAction(std::function<void()> action);
 
+    //添加动作(缓存),此操作不受上下文状态影响
+    void AddActionWithCache(std::function<void()> action);
+
     /*
     * 事件ID(32位)由事件类（高16位）与实例ID（低16位）组成
     */
@@ -81,6 +84,9 @@ private:
 
     //OneNETDevice
     OneNETDevice *device;
+
+    std::queue<std::function<void()>> action_queue_cache;
+    std::mutex action_queue_cache_lock;
 
 };
 

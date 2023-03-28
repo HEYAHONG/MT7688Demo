@@ -1,6 +1,7 @@
 #include "onenetmqtt.h"
 #include "mosquitto.h"
 #include "onenettokencpp.h"
+#include "onenetcontext.h"
 #include "args.h"
 #include "log.h"
 #include <thread>
@@ -51,7 +52,7 @@ static bool checkConfig(OneNETConfig &config)
     return true;
 }
 
-OneNETMQTT::OneNETMQTT():mqtt_context(NULL),on_message_lock(NULL)
+OneNETMQTT::OneNETMQTT():last_publish_time(std::chrono::steady_clock::now()),mqtt_context(NULL),context(NULL)
 {
 
 }
@@ -65,22 +66,23 @@ void OneNETMQTT::MQTTMessage(std::string topic,std::string payload)
     //LOGINFO("%s->topic:%s,payload:%s",TAG,topic.c_str(),payload.c_str()); //此行代码一般用于Debug
     if(_OnMessage!=NULL)
     {
-        try
+        if(context==NULL)
         {
-            if(on_message_lock==NULL)
+            try
             {
                 _OnMessage(topic,payload);
             }
-            else
+            catch(...)
             {
-                std::lock_guard<std::mutex> lock(*on_message_lock);
-                _OnMessage(topic,payload);
+                LOGINFO("%s->process message error!",TAG);
             }
-
         }
-        catch(...)
+        else
         {
-            LOGINFO("%s->process message error!",TAG);
+            context->AddActionWithCache([this,topic,payload]()
+            {
+                _OnMessage(topic,payload);
+            });
         }
 
     }
@@ -215,6 +217,14 @@ bool OneNETMQTT::Publish(std::string topic,std::string payload)
     {
         return false;
     }
+    {
+        //由于OneNET上行限制1条/S,因此限制发布频率
+        while(last_publish_time+std::chrono::milliseconds(1000) >=  std::chrono::steady_clock::now())
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+        }
+        last_publish_time=std::chrono::steady_clock::now();
+    }
     if(IsConnected())
     {
         return MOSQ_ERR_SUCCESS==mosquitto_publish((struct mosquitto *)mqtt_context,NULL,topic.c_str(),payload.length(),payload.c_str(),0,false);
@@ -227,9 +237,9 @@ void OneNETMQTT::SetOnMessage(std::function<void(std::string,std::string)> OnMes
     _OnMessage=OnMessage;
 }
 
-void OneNETMQTT::SetOnMessageLock(std::mutex *lock)
+void OneNETMQTT::SetContext(OneNETContext *_context)
 {
-    on_message_lock=lock;
+    context=_context;
 }
 
 static OneNETMQTT g_mqtt;
@@ -244,6 +254,7 @@ void OneNETMQTTInit()
     if(checkConfig(OneNETConfigDefault()))
     {
         LOGINFO("%s->Check config Ok!Now start mqtt!",TAG);
+        g_mqtt.SetContext(&OneNETContextDefault());
         g_mqtt.Start();
         if(g_mqtt.IsRunning())
         {
