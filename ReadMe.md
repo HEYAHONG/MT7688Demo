@@ -30,6 +30,10 @@ usign -G -c "注释信息" -p key-build.pub -s key-build
 
 软件包实现目录为 [packages/](packages/) 。除开第三方软件包，其余的软件包均将源代码放在本地目录，一般放在该软件包Makefile所在目录。对于C/C++程序，一般采用CMake作为构建工具，可生成适应各种IDE的工程。
 
+### FirstBootInit
+
+软件包实现目录为 [packages/FirstBootInit/](packages/FirstBootInit/)。第一次启动执行的初始化脚本。可用于初始化某些设置（如WIFI）。
+
 ### cli
 
 软件包实现目录为 [packages/cli/](packages/cli/)。命令行程序。作为软件包模板。现无任何功能。

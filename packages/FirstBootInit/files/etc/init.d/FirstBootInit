@@ -1,0 +1,15 @@
+#!/bin/sh /etc/rc.common
+
+START=95
+
+FirstBootInit() {
+	for i in `find /etc/FirstBootInit/script/`
+	do
+		[ -x $i ] && . $i
+	done
+}
+
+boot() {
+	[ -f /etc/FirstBootInit/NeedFirstBoot ] && FirstBootInit
+	[ -f /etc/FirstBootInit/NeedFirstBoot ] && rm  /etc/FirstBootInit/NeedFirstBoot        
+}
