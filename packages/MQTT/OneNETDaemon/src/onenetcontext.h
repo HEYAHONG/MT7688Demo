@@ -40,16 +40,16 @@ public:
     typedef uint16_t EventClassID;
     typedef enum
     {
-        CONTEXT_START_CLASS=0,
+        CONTEXT_START_CLASS = 0,
         CONTEXT_LOOP_CLASS,
         CONTEXT_MQTT_CONNECTED_CLASS,
         CONTEXT_MQTT_DISCONNECTED_CLASS,
         CUSTOM_CLASS_START,
-        UNKOWN_CLASS=0xFFFF
+        UNKOWN_CLASS = 0xFFFF
     } EventClass;
     //注册事件回调
-    EventID RegisterEvent(EventClass evtclass,std::function<void()> callback);
-    EventID RegisterEvent(EventClassID evtclass,std::function<void()> callback);
+    EventID RegisterEvent(EventClass evtclass, std::function<void()> callback);
+    EventID RegisterEvent(EventClassID evtclass, std::function<void()> callback);
     //反注册事件
     void UnRegisterEvent(EventID evtid);
 
@@ -76,7 +76,7 @@ private:
 
     //事件表
     std::mutex event_map_lock;
-    std::map<EventID,std::function<void()>> event_map;
+    std::map<EventID, std::function<void()>> event_map;
 
     //OneNETMQTT
     OneNETMQTT *mqtt;
@@ -90,7 +90,7 @@ private:
 
 };
 
-OneNETContext & OneNETContextDefault();
+OneNETContext &OneNETContextDefault();
 
 void OneNETContextInit();
 

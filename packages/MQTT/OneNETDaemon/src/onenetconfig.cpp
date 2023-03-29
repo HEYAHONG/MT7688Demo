@@ -3,7 +3,7 @@
 #include "log.h"
 #include <netlib.h>
 
-static const char *TAG="OneNET Config";
+static const char *TAG = "OneNET Config";
 
 static OneNETConfig g_cfg;
 
@@ -23,8 +23,8 @@ static void OneNETConfigDefaultInit()
             snprintf(macstr, sizeof(macstr), "%02X%02X%02X%02X%02X%02X", (int)mac[0], (int)mac[1], (int)mac[2], (int)mac[3], (int)mac[4], (int)mac[5]);
             if (strlen(macstr) != 0)
             {
-                LOGINFO("%s->OneNETConfig:mac is %s",TAG,macstr);
-                g_cfg.OneNET.devicename=macstr;
+                LOGINFO("%s->OneNETConfig:mac is %s", TAG, macstr);
+                g_cfg.OneNET.devicename = macstr;
             }
         }
     }
@@ -35,8 +35,8 @@ static void OneNETConfigDefaultInitFromArg()
 {
     try
     {
-        const char *_val=NULL;
-        if((_val=args_get("MQTTAddress"))!=NULL)
+        const char *_val = NULL;
+        if ((_val = args_get("MQTTAddress")) != NULL)
         {
             std::string val(_val);
             if (val.find(":") != std::string::npos)
@@ -61,11 +61,11 @@ static void OneNETConfigDefaultInitFromArg()
             std::string val(_val);
             if (std::stoul(val) != 0)
             {
-                g_cfg.MQTT.ssl=true;
+                g_cfg.MQTT.ssl = true;
             }
             else
             {
-                g_cfg.MQTT.ssl=false;
+                g_cfg.MQTT.ssl = false;
             }
         }
 
@@ -118,25 +118,25 @@ static void OneNETConfigDefaultInitFromArg()
         }
 
     }
-    catch(...)
+    catch (...)
     {
-        LOGINFO("%s->OneNET Config is invalid!",TAG);
+        LOGINFO("%s->OneNET Config is invalid!", TAG);
     }
 }
 
 static void OneNETConfigDefaultPrint()
 {
-    if(!g_cfg.MQTT.serveraddr.empty())
+    if (!g_cfg.MQTT.serveraddr.empty())
     {
-        LOGINFO("%s->Host:%s,Port:%u,Keeplive:%d!",TAG,g_cfg.MQTT.serveraddr.c_str(),g_cfg.MQTT.serverport,g_cfg.MQTT.keeplive);
-        if(!g_cfg.MQTT.ca.empty())
+        LOGINFO("%s->Host:%s,Port:%u,Keeplive:%d!", TAG, g_cfg.MQTT.serveraddr.c_str(), g_cfg.MQTT.serverport, g_cfg.MQTT.keeplive);
+        if (!g_cfg.MQTT.ca.empty())
         {
-            LOGINFO("%s->SSL:%s,CA:%s,CheckServerName:%s",TAG,g_cfg.MQTT.ssl?"true":"false",g_cfg.MQTT.ca.c_str(),g_cfg.MQTT.checkservername?"true":"false");
+            LOGINFO("%s->SSL:%s,CA:%s,CheckServerName:%s", TAG, g_cfg.MQTT.ssl ? "true" : "false", g_cfg.MQTT.ca.c_str(), g_cfg.MQTT.checkservername ? "true" : "false");
         }
     }
-    if(!g_cfg.OneNET.productid.empty() && !g_cfg.OneNET.accesskey.empty() && !g_cfg.OneNET.devicename.empty())
+    if (!g_cfg.OneNET.productid.empty() && !g_cfg.OneNET.accesskey.empty() && !g_cfg.OneNET.devicename.empty())
     {
-        LOGINFO("%s->DeviceName:%s,ProductID:%s,AccessKey:%s!",TAG,g_cfg.OneNET.devicename.c_str(),g_cfg.OneNET.productid.c_str(),g_cfg.OneNET.accesskey.c_str());
+        LOGINFO("%s->DeviceName:%s,ProductID:%s,AccessKey:%s!", TAG, g_cfg.OneNET.devicename.c_str(), g_cfg.OneNET.productid.c_str(), g_cfg.OneNET.accesskey.c_str());
     }
 }
 

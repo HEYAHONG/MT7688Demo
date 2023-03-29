@@ -2,9 +2,9 @@
 #include "onenetmqtt.h"
 #include "onenetdevice.h"
 #include "log.h"
-static const char *TAG="OneNET Context";
+static const char *TAG = "OneNET Context";
 
-OneNETContext::OneNETContext():mqtt(NULL),mqtt_is_connected(false)
+OneNETContext::OneNETContext(): mqtt(NULL), mqtt_is_connected(false)
 {
 
 }
@@ -22,20 +22,20 @@ void OneNETContext::Run()
 {
     //触发循环开始事件
     EmitEventWithoutLock(CONTEXT_START_CLASS);
-    while(true)
+    while (true)
     {
         //触发循环事件
         EmitEventWithoutLock(CONTEXT_LOOP_CLASS);
         //处理MQTT状态
         {
-            OneNETMQTT *current_mqtt=mqtt;
-            if(current_mqtt!=NULL)
+            OneNETMQTT *current_mqtt = mqtt;
+            if (current_mqtt != NULL)
             {
-                bool is_connected=current_mqtt->IsConnected();
-                if(is_connected!=mqtt_is_connected)
+                bool is_connected = current_mqtt->IsConnected();
+                if (is_connected != mqtt_is_connected)
                 {
                     //连接状态改变
-                    if(is_connected)
+                    if (is_connected)
                     {
                         EmitEventWithoutLock(CONTEXT_MQTT_CONNECTED_CLASS);
                     }
@@ -43,35 +43,35 @@ void OneNETContext::Run()
                     {
                         EmitEventWithoutLock(CONTEXT_MQTT_DISCONNECTED_CLASS);
                     }
-                    mqtt_is_connected=is_connected;
+                    mqtt_is_connected = is_connected;
                 }
             }
         }
         {
             //动作缓存
             std::lock_guard<std::mutex> lock(action_queue_cache_lock);
-            while(!action_queue_cache.empty())
+            while (!action_queue_cache.empty())
             {
                 action_queue.push(action_queue_cache.front());
                 action_queue_cache.pop();
             }
         }
         //处理动作
-        if(!action_queue.empty())
+        if (!action_queue.empty())
         {
-            while(!action_queue.empty())
+            while (!action_queue.empty())
             {
-                auto action=action_queue.front();
+                auto action = action_queue.front();
                 {
                     std::lock_guard<std::mutex> lock(context_lock);
                     action_queue.pop();
-                    if(action!=NULL)
+                    if (action != NULL)
                     {
                         try
                         {
                             action();
                         }
-                        catch(...)
+                        catch (...)
                         {
 
                         }
@@ -100,56 +100,56 @@ void OneNETContext::AddActionWithCache(std::function<void()> action)
     action_queue.push(action);
 }
 
-OneNETContext::EventID OneNETContext::RegisterEvent(EventClass evtclass,std::function<void()> callback)
+OneNETContext::EventID OneNETContext::RegisterEvent(EventClass evtclass, std::function<void()> callback)
 {
-    return RegisterEvent(static_cast<EventClassID>(evtclass),callback);
+    return RegisterEvent(static_cast<EventClassID>(evtclass), callback);
 }
 
-OneNETContext::EventID OneNETContext::RegisterEvent(EventClassID evtclass,std::function<void()> callback)
+OneNETContext::EventID OneNETContext::RegisterEvent(EventClassID evtclass, std::function<void()> callback)
 {
-    for(uint16_t insid=0; insid < 0xFFFF ; insid++)
+    for (uint16_t insid = 0; insid < 0xFFFF ; insid++)
     {
-        EventID id=evtclass;
-        id<<=16;
-        id+=insid;
-        if(event_map.find(id)==event_map.end())
+        EventID id = evtclass;
+        id <<= 16;
+        id += insid;
+        if (event_map.find(id) == event_map.end())
         {
             std::lock_guard<std::mutex> lock(event_map_lock);
-            event_map[id]=callback;
+            event_map[id] = callback;
             return id;
         }
         else
         {
-            std::function<void()> action=event_map[id];
-            if(action==NULL)
+            std::function<void()> action = event_map[id];
+            if (action == NULL)
             {
                 std::lock_guard<std::mutex> lock(event_map_lock);
-                event_map[id]=callback;
+                event_map[id] = callback;
                 return id;
             }
         }
     }
-    return ((uint32_t)static_cast<uint16_t>(UNKOWN_CLASS))<<16;
+    return ((uint32_t)static_cast<uint16_t>(UNKOWN_CLASS)) << 16;
 }
 
 void OneNETContext::UnRegisterEvent(EventID evtid)
 {
     std::lock_guard<std::mutex> lock(event_map_lock);
-    if(event_map.find(evtid)!=event_map.end())
+    if (event_map.find(evtid) != event_map.end())
     {
         //使用NULL标记移除
-        event_map[evtid]=NULL;
+        event_map[evtid] = NULL;
     }
 }
 
 void OneNETContext::SetOneNETMQTT(OneNETMQTT *_mqtt)
 {
-    mqtt=_mqtt;
+    mqtt = _mqtt;
 }
 
 void OneNETContext::SetOneNETDevice(OneNETDevice *_device)
 {
-    device=_device;
+    device = _device;
 }
 
 void OneNETContext::AddActionWithoutLock(std::function<void()> action)
@@ -163,15 +163,15 @@ void OneNETContext::EmitEventWithoutLock(EventClass evtclass)
 }
 void OneNETContext::EmitEventWithoutLock(EventClassID evtclass)
 {
-    for(uint16_t insid=0; insid < 0xFFFF ; insid++)
+    for (uint16_t insid = 0; insid < 0xFFFF ; insid++)
     {
-        EventID id=evtclass;
-        id<<=16;
-        id+=insid;
-        if(event_map.find(id)!=event_map.end())
+        EventID id = evtclass;
+        id <<= 16;
+        id += insid;
+        if (event_map.find(id) != event_map.end())
         {
-            std::function<void()> action=event_map[id];
-            if(action==NULL)
+            std::function<void()> action = event_map[id];
+            if (action == NULL)
             {
                 continue;
             }
@@ -186,7 +186,7 @@ void OneNETContext::EmitEventWithoutLock(EventClassID evtclass)
 
 static OneNETContext g_context;
 
-OneNETContext & OneNETContextDefault()
+OneNETContext &OneNETContextDefault()
 {
     return g_context;
 }
@@ -202,22 +202,22 @@ void OneNETContextInit()
 
     {
         //打印部分上下文信息
-        g_context.RegisterEvent(OneNETContext::CONTEXT_START_CLASS,[]()
+        g_context.RegisterEvent(OneNETContext::CONTEXT_START_CLASS, []()
         {
-            LOGINFO("%s->Context start!",TAG);
+            LOGINFO("%s->Context start!", TAG);
         });
-        g_context.RegisterEvent(OneNETContext::CONTEXT_MQTT_CONNECTED_CLASS,[]()
+        g_context.RegisterEvent(OneNETContext::CONTEXT_MQTT_CONNECTED_CLASS, []()
         {
-            LOGINFO("%s->MQTT is connected!",TAG);
+            LOGINFO("%s->MQTT is connected!", TAG);
         });
-        g_context.RegisterEvent(OneNETContext::CONTEXT_MQTT_DISCONNECTED_CLASS,[]()
+        g_context.RegisterEvent(OneNETContext::CONTEXT_MQTT_DISCONNECTED_CLASS, []()
         {
-            LOGINFO("%s->MQTT is connected!",TAG);
+            LOGINFO("%s->MQTT is connected!", TAG);
         });
     }
 
     //启动上下文
-    std::thread([=]()
+    std::thread([ = ]()
     {
         g_context.Run();
     }).detach();

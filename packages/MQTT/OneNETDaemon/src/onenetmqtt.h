@@ -15,17 +15,17 @@ private:
     OneNETContext *context;
     OneNETConfig current_config;
     bool _IsConnected;
-    std::function<void(std::string,std::string)> _OnMessage;
-    void MQTTMessage(std::string topic,std::string payload);
+    std::function<void(std::string, std::string)> _OnMessage;
+    void MQTTMessage(std::string topic, std::string payload);
 public:
     OneNETMQTT();
     virtual ~OneNETMQTT();
-    bool Start(OneNETConfig &config=OneNETConfigDefault());
+    bool Start(OneNETConfig &config = OneNETConfigDefault());
     void Stop();
     bool IsRunning();
     bool IsConnected();
-    bool Publish(std::string topic,std::string payload);
-    void SetOnMessage(std::function<void(std::string,std::string)> OnMessage);
+    bool Publish(std::string topic, std::string payload);
+    void SetOnMessage(std::function<void(std::string, std::string)> OnMessage);
     void SetContext(OneNETContext *_context);
 };
 
