@@ -1,0 +1,30 @@
+#!/bin/sh
+
+. /lib/functions.sh
+. /lib/functions/system.sh
+
+#MAC地址
+Mac=`get_mac_label | sed  's/://g'`
+
+default_wifi_ap() {
+	uci -q batch <<-EOF
+	delete wireless.@wifi-iface[-1]
+	set wireless.WifiAp=wifi-iface
+	set wireless.WifiAp.device='radio0'
+	set wireless.WifiAp.mode='ap'
+	set wireless.WifiAp.ssid="MT7688-$Mac"
+	set wireless.WifiAp.key="MT7688WifiAp"
+	set wireless.WifiAp.network="lan"
+	set wireless.WifiAp.encryption="psk-mixed"
+	set wireless.radio0.disabled=0
+	commit
+	EOF
+}
+#加载wireless配置
+config_load wireless
+
+#默认wifi_ap
+default_wifi_ap
+
+#启动wifi
+wifi
