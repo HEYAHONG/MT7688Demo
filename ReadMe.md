@@ -34,10 +34,6 @@ usign -G -c "注释信息" -p key-build.pub -s key-build
 
 软件包实现目录为 [packages/FirstBootInit/](packages/FirstBootInit/)。第一次启动执行的初始化脚本。可用于初始化某些设置（如WIFI）。
 
-### cli
-
-软件包实现目录为 [packages/cli/](packages/cli/)。命令行程序。作为软件包模板。现无任何功能。
-
 ### netlib
 
 软件包实现目录为 [packages/netlib/](packages/netlib/) 。网络库，包装一些常用的网络操作。作为库软件包模板。包含部分测试程序（编译完成后在 packages/netlib/src/build/,后缀为.exe），测试程序不会安装至openwrt。
