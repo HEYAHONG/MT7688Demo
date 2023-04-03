@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=appnetlib
+PKG_NAME:=appubus
 PKG_RELEASE:=1.0.0-$(shell git rev-parse --short HEAD)
 PKG_MAINTAINER:=HEYAHONG <2229388563@qq.com>
 
@@ -16,17 +16,16 @@ include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
 
-define Package/appnetlib
+define Package/appubus
   SECTION:= Lib
   CATEGORY:= APP
-  DEPENDS:=  +libstdcpp +libc +librt +libpthread
-  TITLE:= netlib
+  DEPENDS:=  +libstdcpp +libc +librt +libpthread +libubus +libubox +libjson-c +libblobmsg-json
+  TITLE:= ubus(user interface)
 endef
 
-define Package/appnetlib/install
+define Package/appubus/install
 	$(INSTALL_DIR) $(1)/usr/lib/
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so* $(1)/usr/lib
-	$(CP) ./files/* $(1)/
 endef
 
 define Build/InstallDev
@@ -39,4 +38,4 @@ define Build/InstallDev
 endef
 
 
-$(eval $(call BuildPackage,appnetlib))
+$(eval $(call BuildPackage,appubus))
