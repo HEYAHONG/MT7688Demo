@@ -9,6 +9,18 @@ int main()
         ubus_cli_register_onconnected([]()
         {
             printf("ubus onconnected callback\n");
+            if (ubus_cli_start_monitor())
+            {
+                ubus_cli_register_monitor([](ubus_cli_monitor_item & item)
+                {
+                    Json::StyledWriter writer;
+                    printf("\nmonitor %s %08X %08X %d \n%s\n", item.send ? "S" : "R", item.client, item.peer, (int)item.type, writer.write(item.data).c_str());
+                });
+            }
+            else
+            {
+                printf("start monitor failed\n");
+            }
         });
         ubus_cli_register_ondisconnected([]()
         {
@@ -17,7 +29,7 @@ int main()
     }
     while (true)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
         printf("ubus is %s\n", ubus_cli_is_connected() ? "connected" : "not connected");
 
         if (ubus_cli_is_connected())

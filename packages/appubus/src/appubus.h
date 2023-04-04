@@ -74,7 +74,7 @@ typedef struct
 {
     uint32_t id;
     std::string path;
-    Json::Value signature;
+    Json::Value signature; //结构Json，当json值为数字时,表示BLOBMSG_TYPE_*（详见blobmsg.h）
 } ubus_cli_list_object_item;
 
 /** \brief ubus list(异步)
@@ -85,6 +85,53 @@ typedef struct
  *
  */
 bool ubus_cli_list(std::string path, std::function<void(ubus_cli_list_object_item &)> result);
+
+/** \brief 是否处于monitor中
+ *
+ * \return bool 是否处于monitor中
+ *
+ */
+bool ubus_cli_is_in_monitor();
+
+/** \brief 启动monitor(必须在ubus成功连接后使用)
+ *
+ *
+ * \return bool 是否成功
+ */
+bool ubus_cli_start_monitor();
+
+/** \brief 停止monitor
+ *
+ *
+ * \return bool 是否成功
+ */
+bool ubus_cli_stop_monitor();
+
+typedef struct
+{
+    int32_t client;
+    int32_t peer;
+    bool send;
+    int32_t seq;
+    int32_t type;//值为UBUS_MSG_*(详见ubusmsg.h)
+    Json::Value data;
+} ubus_cli_monitor_item;
+
+/** \brief 注册monitor回调函数
+ *
+ * \param  _cb std::function<void(ubus_cli_monitor_item &)> 回调函数
+ * \return uint32_t 回调ID
+ *
+ */
+uint32_t ubus_cli_register_monitor(std::function<void(ubus_cli_monitor_item &)> _cb);
+
+/** \brief 反注册monitor回调函数
+ *
+ * \param id uint32_t 回调ID
+ *
+ */
+void ubus_cli_unregister_monitor(uint32_t id);
+
 
 #endif // __cplusplus
 

@@ -9,6 +9,76 @@ extern "C"
 
 #define MAX_CALLBACK_HANDLER_NUMBER 32
 
+static std::string ubus_cli_get_monitor_data(struct blob_attr *data)
+{
+    struct blob_attr_info policy[UBUS_ATTR_MAX] = {0};
+    policy[UBUS_ATTR_STATUS].type = BLOB_ATTR_INT32;
+    policy[UBUS_ATTR_OBJPATH].type = BLOB_ATTR_STRING;
+    policy[UBUS_ATTR_OBJID].type = BLOB_ATTR_INT32;
+    policy[UBUS_ATTR_METHOD].type = BLOB_ATTR_STRING ;
+    policy[UBUS_ATTR_OBJTYPE].type = BLOB_ATTR_INT32 ;
+    policy[UBUS_ATTR_SIGNATURE].type = BLOB_ATTR_NESTED;
+    policy[UBUS_ATTR_DATA].type = BLOB_ATTR_NESTED ;
+    policy[UBUS_ATTR_ACTIVE].type = BLOB_ATTR_INT8 ;
+    policy[UBUS_ATTR_NO_REPLY].type = BLOB_ATTR_INT8 ;
+    policy[UBUS_ATTR_USER].type = BLOB_ATTR_STRING ;
+    policy[UBUS_ATTR_GROUP].type = BLOB_ATTR_STRING ;
+
+    const char   *names[UBUS_ATTR_MAX] = {0};
+    names[UBUS_ATTR_STATUS] = "status";
+    names[UBUS_ATTR_OBJPATH] = "objpath";
+    names[UBUS_ATTR_OBJID] = "objid";
+    names[UBUS_ATTR_METHOD] = "method";
+    names[UBUS_ATTR_OBJTYPE] = "objtype";
+    names[UBUS_ATTR_SIGNATURE] = "signature";
+    names[UBUS_ATTR_DATA] = "data";
+    names[UBUS_ATTR_ACTIVE] = "active";
+    names[UBUS_ATTR_NO_REPLY] = "no_reply";
+    names[UBUS_ATTR_USER] = "user";
+    names[UBUS_ATTR_GROUP] = "group";
+
+    struct blob_attr *tb[UBUS_ATTR_MAX];
+    blob_parse(data, tb, policy, UBUS_ATTR_MAX);
+
+    int i;
+    struct blob_buf b = {0};
+    blob_buf_init(&b, 0);
+    for (i = 0; i < UBUS_ATTR_MAX; i++)
+    {
+        const char *n = names[i];
+        struct blob_attr *v = tb[i];
+
+        if (!tb[i] || !n)
+            continue;
+
+        switch (policy[i].type)
+        {
+        case BLOB_ATTR_INT32:
+            blobmsg_add_u32(&b, n, blob_get_int32(v));
+            break;
+        case BLOB_ATTR_STRING:
+            blobmsg_add_string(&b, n, (const char *)blob_data(v));
+            break;
+        case BLOB_ATTR_INT8:
+            blobmsg_add_u8(&b, n, !!blob_get_int8(v));
+            break;
+        case BLOB_ATTR_NESTED:
+            blobmsg_add_field(&b, BLOBMSG_TYPE_TABLE, n, blobmsg_data(v), blobmsg_data_len(v));
+            break;
+        }
+    }
+
+    char *jsonstr = blobmsg_format_json(b.head, true);
+    std::string ret;
+    if (jsonstr != NULL)
+    {
+        ret = jsonstr;
+        free(jsonstr);
+    }
+    blob_buf_free(&b);
+    return ret;
+}
+
 /*
 通常只需要一个ubus客户端线程，因此采用单例模式
 */
@@ -109,6 +179,69 @@ static class UbusStartUp
         uloop_timeout_set(&loop_timer, 10);
     }
 
+    //monitor回调函数
+    bool IsInMonitor;
+    std::map<uint32_t, std::function<void(ubus_cli_monitor_item &)>> OnUbusMonitorCallback;
+    std::mutex OnUbusMonitorCallbackLock;
+    static void monitor(struct ubus_context *ctx, uint32_t seq, struct blob_attr *data);
+    void OnUbusMonitor(struct ubus_context *ctx, uint32_t seq, struct blob_attr *msg)
+    {
+        struct blob_attr_info policy[UBUS_MONITOR_MAX] = {0};
+        policy[UBUS_MONITOR_CLIENT].type = BLOB_ATTR_INT32 ;
+        policy[UBUS_MONITOR_PEER].type = BLOB_ATTR_INT32 ;
+        policy[UBUS_MONITOR_SEND].type = BLOB_ATTR_INT8 ;
+        policy[UBUS_MONITOR_TYPE].type = BLOB_ATTR_INT32 ;
+        policy[UBUS_MONITOR_DATA].type = BLOB_ATTR_NESTED ;
+        struct blob_attr *tb[UBUS_MONITOR_MAX];
+        blob_parse_untrusted(msg, blob_raw_len(msg), tb, policy, UBUS_MONITOR_MAX);
+
+        if (!tb[UBUS_MONITOR_CLIENT] ||
+                !tb[UBUS_MONITOR_PEER] ||
+                !tb[UBUS_MONITOR_SEND] ||
+                !tb[UBUS_MONITOR_TYPE] ||
+                !tb[UBUS_MONITOR_DATA])
+        {
+            return;
+        }
+
+        bool send = blob_get_int32(tb[UBUS_MONITOR_SEND]);
+        uint32_t client = blob_get_int32(tb[UBUS_MONITOR_CLIENT]);
+        uint32_t peer = blob_get_int32(tb[UBUS_MONITOR_PEER]);
+        uint32_t type = blob_get_int32(tb[UBUS_MONITOR_TYPE]);
+        std::string data = ubus_cli_get_monitor_data(tb[UBUS_MONITOR_DATA]);
+        ubus_cli_monitor_item item;
+        item.client = client;
+        item.peer = peer;
+        item.send = send;
+        item.seq = seq;
+        item.type = type;
+        {
+            Json::Reader reader;
+            reader.parse(data, item.data);
+        }
+
+        std::map<uint32_t, std::function<void(ubus_cli_monitor_item &)>> cb;
+        {
+            std::lock_guard<std::mutex> lock(OnUbusMonitorCallbackLock);
+            cb =  OnUbusMonitorCallback;
+        }
+        for (auto callback : cb)
+        {
+            if (callback.second != NULL)
+            {
+                try
+                {
+                    callback.second(item);
+                }
+                catch (...)
+                {
+
+                }
+            }
+        }
+    }
+
+
     //运行主循环
     void run()
     {
@@ -132,6 +265,8 @@ static class UbusStartUp
                 {
                     ubus_add_uloop(ctx);
                     ctx->connection_lost = ubus_connection_lost_callback;
+                    ctx->monitor_cb = monitor;
+                    IsInMonitor = false;
                     OnUbusConnected();
                 }
                 else
@@ -153,6 +288,7 @@ static class UbusStartUp
                     OnUbusDisconnected();
                     ubus_free(ctx);
                     ctx = NULL;
+                    IsInMonitor = false;
                 }
             }
 
@@ -161,7 +297,7 @@ static class UbusStartUp
     }
 public:
     //构造函数（启动Ubus连接）
-    UbusStartUp(): ctx(NULL), loop_timer({0})
+    UbusStartUp(): ctx(NULL), loop_timer({0}), IsInMonitor(false)
     {
         uloop_init();
         //启动线程
@@ -257,6 +393,7 @@ public:
         LoopActionCache.push(cb);
     }
 
+    //ubus list
     static void ubus_lookup_handler(struct ubus_context *ctx, struct ubus_object_data *obj, void *priv)
     {
         std::function<void(ubus_cli_list_object_item &)> &result = (*(std::function<void(ubus_cli_list_object_item &)> *)priv);
@@ -297,11 +434,95 @@ public:
         return false;
     }
 
+    //monitor
+    bool UbusMonitorStart()
+    {
+        if (!IsConnected())
+        {
+            return false;
+        }
+        if (!IsInMonitor)
+        {
+            if (UBUS_STATUS_OK == ubus_monitor_start(ctx))
+            {
+                IsInMonitor = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool UbusMonitorStop()
+    {
+        if (!IsConnected())
+        {
+            return false;
+        }
+        if (IsInMonitor)
+        {
+            if (UBUS_STATUS_OK == ubus_monitor_stop(ctx))
+            {
+                IsInMonitor = false;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    bool UbusIsInMonitor()
+    {
+        return IsInMonitor;
+    }
+    uint32_t RegisterOnUbusMonitor(std::function<void(ubus_cli_monitor_item &)> _cb)
+    {
+        for (uint32_t i = 0; i <= MAX_CALLBACK_HANDLER_NUMBER; i++)
+        {
+            if (OnUbusMonitorCallback.find(i) != OnUbusMonitorCallback.end())
+            {
+                if (OnUbusMonitorCallback[i] == NULL)
+                {
+                    std::lock_guard<std::mutex> lock(OnUbusMonitorCallbackLock);
+                    OnUbusMonitorCallback[i] = _cb;
+                    return i;
+                }
+            }
+            else
+            {
+                std::lock_guard<std::mutex> lock(OnUbusMonitorCallbackLock);
+                OnUbusMonitorCallback[i] = _cb;
+                return i;
+            }
+        }
+        return UBUS_INVALID_CALLBACK_ID;
+    }
+    void UnRegisterOnUbusMonitor(uint32_t id)
+    {
+        if (OnUbusMonitorCallback.find(id) != OnUbusMonitorCallback.end())
+        {
+            std::lock_guard<std::mutex> lock(OnUbusMonitorCallbackLock);
+            OnUbusMonitorCallback[id] = NULL;
+        }
+    }
+
+
 } g_ubus;
 
 void UbusStartUp::uloop_timeout_handler(struct uloop_timeout *t)
 {
     g_ubus.OnUbusLoopTimer(t);
+}
+
+void UbusStartUp::monitor(struct ubus_context *ctx, uint32_t seq, struct blob_attr *data)
+{
+    g_ubus.OnUbusMonitor(ctx, seq, data);
 }
 
 bool ubus_cli_is_connected()
@@ -334,6 +555,28 @@ bool ubus_cli_list(std::string path, std::function<void(ubus_cli_list_object_ite
     return g_ubus.UbusList(path, result);
 }
 
+bool ubus_cli_is_in_monitor()
+{
+    return g_ubus.UbusIsInMonitor();
+}
 
+bool ubus_cli_start_monitor()
+{
+    return g_ubus.UbusMonitorStart();
+}
 
+bool ubus_cli_stop_monitor()
+{
+    return g_ubus.UbusMonitorStop();
+}
+
+uint32_t ubus_cli_register_monitor(std::function<void(ubus_cli_monitor_item &)> _cb)
+{
+    return g_ubus.RegisterOnUbusMonitor(_cb);
+}
+
+void ubus_cli_unregister_monitor(uint32_t id)
+{
+    g_ubus.UnRegisterOnUbusMonitor(id);
+}
 
