@@ -19,7 +19,7 @@ include $(INCLUDE_DIR)/cmake.mk
 define Package/appubus
   SECTION:= Lib
   CATEGORY:= APP
-  DEPENDS:=  +libstdcpp +libc +librt +libpthread +libubus +libubox +libjson-c +libblobmsg-json
+  DEPENDS:=  +libstdcpp +libc +librt +libpthread +libubus +libubox +libjson-c +libblobmsg-json +jsoncpp
   TITLE:= ubus(user interface)
 endef
 

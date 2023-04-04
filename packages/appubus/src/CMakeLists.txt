@@ -45,6 +45,11 @@ include(FindPkgConfig)
 pkg_check_modules(Json-C REQUIRED  IMPORTED_TARGET json-c)
 target_link_libraries(appubus  PkgConfig::Json-C)
 
+#jsoncpp
+pkg_check_modules(JsonCpp REQUIRED  IMPORTED_TARGET jsoncpp)
+target_link_libraries( appubus  PkgConfig::JsonCpp)
+
+
 #pthread库
 find_package( Threads REQUIRED)
 target_link_libraries(appubus  ${CMAKE_THREAD_LIBS_INIT} )
@@ -62,7 +67,7 @@ endif()
 #libubox
 check_include_file_cxx("libubox/blobmsg_json.h"  HAVE_LIBUBOX_BLOBMSG_JSON_H)
 if(HAVE_LIBUBOX_BLOBMSG_JSON_H)
-target_link_libraries(appubus ubox blobmsg_json)
+target_link_libraries(appubus ubox blobmsg_json )
 else()
 message(FATAL_ERROR "libbox is not found!")
 endif()
