@@ -415,18 +415,31 @@ public:
             result(item);
         }
     }
-    bool UbusList(std::string path, std::function<void(ubus_cli_list_object_item &)> result)
+    bool UbusList(std::string path, std::function<void(ubus_cli_list_object_item &)> result, std::function<void()> error)
     {
         if (result != NULL && IsConnected())
         {
-            auto cb = [path, result, this]()
+            auto cb = [path, result, error, this]()
             {
                 const  char *lookup_path = NULL;
                 if (path.length() > 0)
                 {
                     lookup_path = path.c_str();
                 }
-                ubus_lookup(ctx, lookup_path, ubus_lookup_handler, (void *)&result);
+                if (UBUS_STATUS_INVALID_ARGUMENT == ubus_lookup(ctx, lookup_path, ubus_lookup_handler, (void *)&result))
+                {
+                    if (error != NULL)
+                    {
+                        try
+                        {
+                            error();
+                        }
+                        catch (...)
+                        {
+
+                        }
+                    }
+                }
             };
             AddLoopAction(cb);
             return true;
@@ -550,9 +563,9 @@ void ubus_cli_unregister_ondisconnected(uint32_t id)
     g_ubus.UnRegisterOnUbusDisconnected(id);
 }
 
-bool ubus_cli_list(std::string path, std::function<void(ubus_cli_list_object_item &)> result)
+bool ubus_cli_list(std::string path, std::function<void(ubus_cli_list_object_item &)> result, std::function<void()> error)
 {
-    return g_ubus.UbusList(path, result);
+    return g_ubus.UbusList(path, result, error);
 }
 
 bool ubus_cli_is_in_monitor()

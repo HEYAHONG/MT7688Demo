@@ -81,10 +81,11 @@ typedef struct
  *
  * \param path std::string 路径
  * \param result std::function<void(ubus_cli_list_object_item &)> 结果回调（为空将不执行）
+ * \param error std::function<void()> 失败回调，当执行失败时调用。
  * \return bool 是否加入执行队列
  *
  */
-bool ubus_cli_list(std::string path, std::function<void(ubus_cli_list_object_item &)> result);
+bool ubus_cli_list(std::string path, std::function<void(ubus_cli_list_object_item &)> result, std::function<void()> error = NULL);
 
 /** \brief 是否处于monitor中
  *
