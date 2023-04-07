@@ -39,6 +39,12 @@ int main()
                 Json::StyledWriter writer;
                 printf("ubus list\n%s:%08X\n%s\n", item.path.c_str(), item.id, writer.write(item.signature).c_str());
             });
+
+            ubus_cli_call("network.interface.wan", "status", Json::Value(), [](Json::Value result)
+            {
+                Json::StyledWriter writer;
+                printf("\nubus call network.interface.wan status\n%s\n", writer.write(result).c_str());
+            });
         }
     }
 }

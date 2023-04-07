@@ -134,6 +134,20 @@ uint32_t ubus_cli_register_monitor(std::function<void(ubus_cli_monitor_item &)> 
 void ubus_cli_unregister_monitor(uint32_t id);
 
 
+/** \brief ubus call(异步)
+ *
+ * \param path std::string 路径,不可为空
+ * \param method std::string 方法,不可为空
+ * \param msg Json::Value 当为object时有效
+ * \param result std::function<void(Json::Value )> 结果回调
+ * \param timeout_ms size_t 调用超时
+ * \param error std::function<void()> 失败回调（当失败时调用）
+ * \return bool 是否加入执行队列
+ *
+ */
+bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::function<void(Json::Value)> result, size_t timeout_ms = 3000, std::function<void()> error = NULL);
+
+
 #endif // __cplusplus
 
 #endif // APPUBUS_H

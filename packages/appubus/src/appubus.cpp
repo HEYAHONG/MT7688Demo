@@ -526,6 +526,86 @@ public:
     }
 
 
+    //ubus call
+    static void ubus_call_receive_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
+    {
+        std::function<void(Json::Value)> &result = *(std::function<void(Json::Value)> *)req->priv;
+        char *json_str = blobmsg_format_json(msg, true);
+        if (json_str != NULL)
+        {
+            Json::Value value;
+            Json::Reader reader;
+            if (reader.parse(json_str, value))
+            {
+                if (result != NULL)
+                {
+                    try
+                    {
+                        result(value);
+                    }
+                    catch (...)
+                    {
+
+                    }
+                }
+            }
+            free(json_str);
+        }
+    }
+    bool UbusCall(std::string path, std::string method, Json::Value msg, std::function<void(Json::Value)> result, size_t timeout_ms, std::function<void()> error)
+    {
+        if (path.empty() || method.empty())
+        {
+            return false;
+        }
+
+        auto cb = [ =, this]()
+        {
+            uint32_t id = 0;
+            if (UBUS_STATUS_OK != ubus_lookup_id(ctx, path.c_str(), &id))
+            {
+                if (error != NULL)
+                {
+                    try
+                    {
+                        error();
+                    }
+                    catch (...)
+                    {
+
+                    }
+                }
+                return;
+            }
+            blob_buf b = {0};
+            blob_buf_init(&b, 0);
+            if (msg.isObject())
+            {
+                Json::FastWriter writer;
+                blobmsg_add_json_from_string(&b, writer.write(msg).c_str());
+            }
+            int ret = ubus_invoke(ctx, id, method.c_str(), b.head, ubus_call_receive_call_result_data, (void *)&result, timeout_ms);
+            blob_buf_free(&b);
+            if (ret != UBUS_STATUS_OK)
+            {
+                if (error != NULL)
+                {
+                    try
+                    {
+                        error();
+                    }
+                    catch (...)
+                    {
+
+                    }
+                }
+            }
+        };
+        AddLoopAction(cb);
+
+        return true;
+    }
+
 } g_ubus;
 
 void UbusStartUp::uloop_timeout_handler(struct uloop_timeout *t)
@@ -591,5 +671,10 @@ uint32_t ubus_cli_register_monitor(std::function<void(ubus_cli_monitor_item &)> 
 void ubus_cli_unregister_monitor(uint32_t id)
 {
     g_ubus.UnRegisterOnUbusMonitor(id);
+}
+
+bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::function<void(Json::Value)> result, size_t timeout_ms, std::function<void()> error)
+{
+    return g_ubus.UbusCall(path, method, msg, result, timeout_ms, error);
 }
 
