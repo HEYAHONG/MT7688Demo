@@ -148,6 +148,16 @@ void ubus_cli_unregister_monitor(uint32_t id);
 bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::function<void(Json::Value)> result, size_t timeout_ms = 3000, std::function<void()> error = NULL);
 
 
+/** \brief ubus send(异步)
+ *
+ * \param id std::string  事件类型
+ * \param msg Json::Value 事件内容（当类型为object时有效）
+ * \param error std::function<void()> 失败回调（当失败时调用）
+ * \return bool 是否加入执行队列
+ *
+ */
+bool ubus_cli_send(std::string id, Json::Value msg, std::function<void()> error = NULL);
+
 #endif // __cplusplus
 
 #endif // APPUBUS_H

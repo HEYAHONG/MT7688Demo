@@ -559,6 +559,11 @@ public:
             return false;
         }
 
+        if (!IsConnected())
+        {
+            return false;
+        }
+
         auto cb = [ =, this]()
         {
             uint32_t id = 0;
@@ -604,6 +609,47 @@ public:
         AddLoopAction(cb);
 
         return true;
+    }
+
+    //ubus send
+    bool UbusSend(std::string id, Json::Value msg, std::function<void()> error)
+    {
+        if (id.empty())
+        {
+            return false;
+        }
+        if (!IsConnected())
+        {
+            return false;
+        }
+        auto cb = [this, id, msg, error]()
+        {
+            blob_buf b = {0};
+            blob_buf_init(&b, 0);
+            if (msg.isObject())
+            {
+                Json::FastWriter writer;
+                blobmsg_add_json_from_string(&b, writer.write(msg).c_str());
+            }
+            int ret = ubus_send_event(ctx, id.c_str(), b.head);
+            blob_buf_free(&b);
+            if (ret != UBUS_STATUS_OK)
+            {
+                if (error != NULL)
+                {
+                    try
+                    {
+                        error();
+                    }
+                    catch (...)
+                    {
+
+                    }
+                }
+            }
+        };
+        AddLoopAction(cb);
+        return false;
     }
 
 } g_ubus;
@@ -678,3 +724,7 @@ bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::f
     return g_ubus.UbusCall(path, method, msg, result, timeout_ms, error);
 }
 
+bool ubus_cli_send(std::string id, Json::Value msg, std::function<void()> error)
+{
+    return g_ubus.UbusSend(id, msg, error);
+}

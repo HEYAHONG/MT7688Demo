@@ -45,6 +45,13 @@ int main()
                 Json::StyledWriter writer;
                 printf("\nubus call network.interface.wan status\n%s\n", writer.write(result).c_str());
             });
+
+            {
+                ubus_cli_send("ubus_test_1", Json::Value());
+                Json::Value msg;
+                msg["data"] = 1;
+                ubus_cli_send("ubus_test_2", msg);
+            }
         }
     }
 }
