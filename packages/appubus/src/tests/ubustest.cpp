@@ -21,6 +21,12 @@ int main()
             {
                 printf("start monitor failed\n");
             }
+
+            ubus_cli_register_listen("test_event", [](std::string type, Json::Value & event)
+            {
+                Json::StyledWriter writer;
+                printf("\nevent:%s\n%s\n", type.c_str(), writer.write(event).c_str());
+            });
         });
         ubus_cli_register_ondisconnected([]()
         {

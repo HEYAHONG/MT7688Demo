@@ -121,7 +121,7 @@ typedef struct
 /** \brief 注册monitor回调函数
  *
  * \param  _cb std::function<void(ubus_cli_monitor_item &)> 回调函数
- * \return uint32_t 回调ID
+ * \return uint32_t 回调ID,用于反注册，失败返回UBUS_INVALID_CALLBACK_ID
  *
  */
 uint32_t ubus_cli_register_monitor(std::function<void(ubus_cli_monitor_item &)> _cb);
@@ -157,6 +157,22 @@ bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::f
  *
  */
 bool ubus_cli_send(std::string id, Json::Value msg, std::function<void()> error = NULL);
+
+/** \brief 注册事件监听
+ *
+ * \param  pattem std::string 监听参数,为空表示监听所有
+ * \param  callback std::function<voi(Json::Value &)>  回调函数
+ * \return uint32_t 回调ID,用于反注册，失败返回UBUS_INVALID_CALLBACK_ID
+ *
+ */
+uint32_t ubus_cli_register_listen(std::string pattem, std::function<void(std::string, Json::Value &)> callback);
+
+/** \brief 反注册事件监听
+ *
+ * \param id uint32_t 回调ID
+ *
+ */
+void ubus_cli_unregister_listen(uint32_t id);
 
 #endif // __cplusplus
 

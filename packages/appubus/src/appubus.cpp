@@ -241,6 +241,104 @@ static class UbusStartUp
         }
     }
 
+    //ubus listen
+    class ubus_listen_item_t
+    {
+        typedef struct
+        {
+            struct ubus_event_handler evt_handler;
+            ubus_listen_item_t *ptr;
+        } ubus_event_handler_with_ptr;
+        std::function<void(std::string, Json::Value &)> event_data_callback;
+        std::shared_ptr<ubus_event_handler_with_ptr> evt;
+        UbusStartUp *startup;
+        void clear()
+        {
+            event_data_callback = NULL;
+            if (evt.get() != NULL)
+            {
+                memset(evt.get(), 0, sizeof(ubus_event_handler_with_ptr));
+            }
+        }
+    public:
+        ubus_listen_item_t(UbusStartUp *_startup = NULL): evt(std::make_shared<ubus_event_handler_with_ptr>()), startup(_startup)
+        {
+            clear();
+        };
+        ubus_listen_item_t &operator=(ubus_listen_item_t &others) = default;
+        ubus_listen_item_t &operator=(ubus_listen_item_t &&others) = default;
+        bool setcallback(std::string pattem, std::function<void(std::string, Json::Value &)> cb)
+        {
+            if (pattem.empty())
+            {
+                pattem = "*";
+            }
+            if (isvalid())
+            {
+                //清除以前的事件注册
+                if (startup != NULL)
+                {
+                    struct ubus_event_handler &evt_handler = (*(struct ubus_event_handler *)evt.get());
+                    ubus_unregister_event_handler(startup->ctx, &evt_handler);
+                }
+                clear();
+            }
+            event_data_callback = cb;
+            if (event_data_callback != NULL)
+            {
+                //回调函数不为空
+                evt.get()->ptr = this;
+                struct ubus_event_handler &evt_handler = (*(struct ubus_event_handler *)evt.get());
+                evt_handler.cb = [](struct ubus_context * ctx, struct ubus_event_handler * ev, const char *type, struct blob_attr * msg)
+                {
+                    char *json_str = blobmsg_format_json(msg, true);
+                    if (json_str != NULL)
+                    {
+                        Json::Value value;
+                        Json::Reader reader;
+                        if (reader.parse(json_str, value))
+                        {
+                            try
+                            {
+                                ubus_event_handler_with_ptr *evt = (ubus_event_handler_with_ptr *)ev;
+                                if (evt != NULL && evt->ptr != NULL)
+                                {
+                                    std::function<void(std::string, Json::Value &)> &event_data_callback = evt->ptr->event_data_callback;
+                                    if (event_data_callback != NULL)
+                                    {
+                                        event_data_callback(type, value);
+                                    }
+                                }
+                            }
+                            catch (...)
+                            {
+
+                            }
+                        }
+                        free(json_str);
+                    }
+                };
+                if (startup != NULL)
+                {
+                    if (UBUS_STATUS_OK == ubus_register_event_handler(startup->ctx, &evt_handler, pattem.c_str()))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        bool isvalid()
+        {
+            return event_data_callback != NULL;
+        }
+    };
+    std::map<uint32_t, ubus_listen_item_t> UbusListenList;
+    std::mutex UbusListenListLock;
+
+
+
 
     //运行主循环
     void run()
@@ -289,6 +387,11 @@ static class UbusStartUp
                     ubus_free(ctx);
                     ctx = NULL;
                     IsInMonitor = false;
+                    {
+                        //断开连接后listen失效
+                        std::lock_guard<std::mutex> lock(UbusListenListLock);
+                        UbusListenList.clear();
+                    }
                 }
             }
 
@@ -652,6 +755,56 @@ public:
         return false;
     }
 
+    //ubus listen
+    uint32_t RegisterUbusListen(std::string pattem, std::function<void(std::string, Json::Value &)> callback)
+    {
+        if (callback == NULL)
+        {
+            return UBUS_INVALID_CALLBACK_ID;
+        }
+        for (uint32_t i = 0; i <= MAX_CALLBACK_HANDLER_NUMBER; i++)
+        {
+            if (UbusListenList.find(i) != UbusListenList.end())
+            {
+                if (!UbusListenList[i].isvalid())
+                {
+                    auto cb = [this, pattem, callback, i]()
+                    {
+                        UbusListenList[i].setcallback(pattem, callback);
+                    };
+                    AddLoopAction(cb);
+                    return i;
+                }
+            }
+            else
+            {
+                {
+                    std::lock_guard<std::mutex> lock(UbusListenListLock);
+                    UbusListenList[i] = ubus_listen_item_t(this);
+                }
+                auto cb = [this, pattem, callback, i]()
+                {
+                    UbusListenList[i].setcallback(pattem, callback);
+                };
+                AddLoopAction(cb);
+                return i;
+            }
+        }
+        return UBUS_INVALID_CALLBACK_ID;
+    }
+
+    void UnRegisterUbusListen(uint32_t id)
+    {
+        if (UbusListenList.find(id) != UbusListenList.end())
+        {
+            auto cb = [this, id]()
+            {
+                UbusListenList[id].setcallback("", NULL);
+            };
+            AddLoopAction(cb);
+        }
+    }
+
 } g_ubus;
 
 void UbusStartUp::uloop_timeout_handler(struct uloop_timeout *t)
@@ -727,4 +880,14 @@ bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::f
 bool ubus_cli_send(std::string id, Json::Value msg, std::function<void()> error)
 {
     return g_ubus.UbusSend(id, msg, error);
+}
+
+uint32_t ubus_cli_register_listen(std::string pattem, std::function<void(std::string, Json::Value &)> callback)
+{
+    return g_ubus.RegisterUbusListen(pattem, callback);
+}
+
+void ubus_cli_unregister_listen(uint32_t id)
+{
+    g_ubus.UnRegisterUbusListen(id);
 }
