@@ -161,7 +161,7 @@ bool ubus_cli_send(std::string id, Json::Value msg, std::function<void()> error 
 /** \brief 注册事件监听
  *
  * \param  pattem std::string 监听参数,为空表示监听所有
- * \param  callback std::function<voi(Json::Value &)>  回调函数
+ * \param  callback std::function<void(std::string, Json::Value &)>  回调函数
  * \return uint32_t 回调ID,用于反注册，失败返回UBUS_INVALID_CALLBACK_ID
  *
  */
