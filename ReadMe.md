@@ -40,6 +40,12 @@ usign -G -c "注释信息" -p key-build.pub -s key-build
 
 ![netlib](doc/image/netlib.png)
 
+### appubus
+
+软件包实现目录为 [packages/appubus](packages/appubus)。使用C++封装常用的ubus客户端功能。
+
+![appubus](doc/image/appubus.png)
+
 ### MQTTDaemon
 
 软件包实现目录为 [packages/MQTT/MQTTDaemon/](packages/MQTT/MQTTDaemon/) 。MQTT守护进程，可连接MQTT Broker。
