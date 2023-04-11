@@ -158,7 +158,7 @@ bool ubus_cli_call(std::string path, std::string method, Json::Value msg, std::f
  */
 bool ubus_cli_send(std::string id, Json::Value msg, std::function<void()> error = NULL);
 
-/** \brief 注册事件监听
+/** \brief 注册事件监听(需要在ubus已连接时使用，ubus断开连接时失效)
  *
  * \param  pattem std::string 监听参数,为空表示监听所有
  * \param  callback std::function<void(std::string, Json::Value &)>  回调函数
