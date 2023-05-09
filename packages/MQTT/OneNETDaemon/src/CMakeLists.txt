@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.20)
 set(PROJECTNAME OneNETDaemon)
 project(${PROJECTNAME} C CXX ASM)
 #添加库,添加源代码
-file(GLOB NETLIB_HEADER_FILES *.h)
-file(GLOB NETLIB_SOURCES_FILES *.c *.cpp)
-add_executable(${PROJECTNAME}   ${NETLIB_SOURCES_FILES} ${NETLIB_HEADER_FILES} )
+file(GLOB CXX_C_HEADER_FILES *.h)
+file(GLOB CXX_C_SOURCES_FILES *.c *.cpp)
+add_executable(${PROJECTNAME}   ${CXX_C_SOURCES_FILES} ${CXX_C_HEADER_FILES} )
 #设置C++标准
 set_property(TARGET ${PROJECTNAME}   PROPERTY CXX_STANDARD 20)
 
