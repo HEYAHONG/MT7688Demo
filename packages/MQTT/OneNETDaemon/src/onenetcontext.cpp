@@ -212,7 +212,7 @@ void OneNETContextInit()
         });
         g_context.RegisterEvent(OneNETContext::CONTEXT_MQTT_DISCONNECTED_CLASS, []()
         {
-            LOGINFO("%s->MQTT is connected!", TAG);
+            LOGINFO("%s->MQTT is not connected!", TAG);
         });
     }
 
