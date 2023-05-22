@@ -131,7 +131,7 @@ echo -e "\033[44;37m安装openwrt feed\033[40;37m";
 cd $ROOT_PATH/openwrt
 ./scripts/feeds update -a
 [ $? -eq 0 ] || exit;
-./scripts/feeds install -a
+./scripts/feeds install -a -f
 [ $? -eq 0 ] || exit;
 
 #软件包黑名单
